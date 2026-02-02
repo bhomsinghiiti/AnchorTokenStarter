@@ -50,5 +50,8 @@ jobs:
       - name: Build
         run: anchor build
 
+      - name: Create test keypair
+        run: solana-keygen new --no-bip39 --silent --outfile ~/.config/solana/id.json
+
       - name: Test
         run: anchor test
