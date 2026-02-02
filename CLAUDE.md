@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **AnchorTokenStarter** - A Solana/Anchor project demonstrating token operations including mint creation, token minting, and transfers. This starter template provides essential building blocks for Solana token development.
 
-**Program ID**: `4axna8Sy83cq21JRGeJnEunDDPZNGiiF1NGuoT6WZrBJ`
+**Program ID**: `AT3LVeEomGSHCdD1vASqsnFvwm8Y4KmY9Z9BLbEt3jEa`
 
 ## Working Versions (Verified)
 
@@ -113,6 +113,53 @@ anchor deploy --provider.cluster devnet
 anchor deploy --provider.cluster mainnet-beta
 ```
 
+#### Local Deployment Flow
+
+For localnet testing, you have two options:
+
+**Option 1: Manual validator start (Recommended for debugging)**
+```bash
+# Terminal 1: Start local validator
+solana-test-validator --ledger /tmp/test-ledger
+
+# Terminal 2: Deploy your program
+anchor build
+anchor deploy
+
+# Verify deployment
+solana program show AT3LVeEomGSHCdD1vASqsnFvwm8Y4KmY9Z9BLbEt3jEa
+```
+
+**Option 2: Auto-managed (anchor test)**
+```bash
+# anchor test automatically starts/stops validator for you
+anchor test
+```
+
+#### Program ID Management
+
+Unlike Ethereum where contract addresses are calculated from deployer + nonce, Solana program IDs are baked into the binary:
+
+```bash
+# View your program keypairs
+anchor keys list
+
+# If you need to sync the declared ID with the keypair:
+solana-keygen pubkey target/deploy/anchortokenstarter-keypair.json
+# Then update declare_id!() in lib.rs to match
+```
+
+#### Foundry vs Anchor Deployment Comparison
+
+| Concept | Foundry/Ethereum | Anchor/Solana |
+|---------|------------------|---------------|
+| **Binary** | `MyToken.json` (ABI + bytecode) | `anchortokenstarter.so` (BPF bytecode) |
+| **Address** | Calculated from sender + nonce | Baked into binary via `declare_id!()` |
+| **Key needed** | Just private key for signing | Program keypair must match declared ID |
+| **Deployment** | `forge script Deploy.s.s --broadcast` | `anchor deploy` |
+| **Local node** | `anvil` | `solana-test-validator` |
+| **Upgradeable** | Proxy patterns (Transparent/UUPS) | Native via `BPFLoaderUpgradeable` |
+
 ### Other Useful Commands
 ```bash
 # Generate new program keypair
@@ -133,6 +180,93 @@ yarn run lint:fix
 # Check code formatting
 yarn run lint
 ```
+
+## Solidity to Rust Reference
+
+For Solidity developers transitioning to Anchor/Solana:
+
+### Basic Syntax Mapping
+
+| Solidity | Anchor/Rust | This Project |
+|----------|-------------|--------------|
+| `contract MyToken` | `#[program] pub mod my_token` | `anchortokenstarter` |
+| `constructor()` | `initialize()` | Initialize instruction |
+| `function mint()` | `pub fn mint()` | `create_mint`, `mint_tokens` |
+| `msg.sender` | `ctx.accounts.signer` | Signer accounts |
+| `public/external` | `pub fn` | All instruction handlers |
+| `require()` | `require!()` macro | Validation |
+| `emit Event()` | `msg!()` macro | Logging |
+| `mapping(address => uint)` | `#[account]` struct | `Counter` account |
+
+### Account Validation vs Function Parameters
+
+```solidity
+// Solidity - Simple parameters
+function mint(address to, uint256 amount) external {
+    balances[to] += amount;
+}
+```
+
+```rust
+// Anchor - Accounts struct (validated BEFORE execution)
+#[derive(Accounts)]
+pub struct MintTokens<'info> {
+    #[account(mut)] pub signer: Signer<'info>,
+    pub mint: InterfaceAccount<'info, Mint>,
+    #[account(
+        init_if_needed,
+        payer = signer,
+        associated_token::mint = mint,
+        associated_token::authority = signer
+    )]
+    pub token_account: InterfaceAccount<'info, TokenAccount>,
+}
+
+pub fn mint_tokens(ctx: Context<MintTokens>, amount: u64) -> Result<()> {
+    // CPI to SPL Token program
+    token_interface::mint_to(cpi_context, amount)?;
+    Ok(())
+}
+```
+
+### State Storage Model
+
+```solidity
+// Solidity - Contract storage
+contract Counter {
+    uint256 public count = 0;
+    function increment() external { count++; }
+}
+```
+
+```rust
+// Anchor - Separate account (rent-exempt)
+#[account]
+pub struct Counter {
+    pub count: u64,
+}
+
+#[derive(Accounts)]
+pub struct Increment<'info> {
+    #[account(
+        init_if_needed,
+        payer = payer,
+        space = 8 + Counter::INIT_SPACE,
+        seeds = [b"counter"],
+        bump
+    )]
+    pub counter: Account<'info, Counter>,
+    pub payer: Signer<'info>,
+}
+```
+
+### Key Differences
+
+1. **Accounts vs Storage**: Solana uses separate accounts (PDAs) instead of contract storage
+2. **Account Validation**: Anchor validates all accounts before instruction executes
+3. **Rent**: Accounts must hold minimum SOL balance to exist (rent-exempt)
+4. **PDAs**: Program Derived Addresses for deterministic account addresses
+5. **CPI**: Cross-Program Invocation to call other programs (like SPL Token)
 
 ## Architecture
 
