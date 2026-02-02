@@ -145,6 +145,20 @@ describe("AnchorTokenStarter", () => {
         recipient.publicKey
       );
 
+      // Create the recipient's ATA first
+      const createAtaTx = await program.methods
+        .mintTokens(new anchor.BN(0))
+        .accounts({
+          signer: recipient.publicKey,
+          mint: mintPda,
+          tokenAccount: recipientATA,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .signers([recipient])
+        .rpc();
+
       // Get initial balances
       const initialSenderBalance = (
         await getAccount(provider.connection, senderATA)

@@ -7,7 +7,7 @@ use anchor_spl::{
 declare_id!("4axna8Sy83cq21JRGeJnEunDDPZNGiiF1NGuoT6WZrBJ");
 
 #[program]
-pub mod my_first_project {
+pub mod anchortokenstarter {
     use super::*;
 
     /// Initialize - Basic hello world
