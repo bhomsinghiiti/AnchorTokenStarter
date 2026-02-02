@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-my_first_project = "4axna8Sy83cq21JRGeJnEunDDPZNGiiF1NGuoT6WZrBJ"
+anchortokenstarter = "4axna8Sy83cq21JRGeJnEunDDPZNGiiF1NGuoT6WZrBJ"
 
 [registry]
 url = "https://api.apr.dev"

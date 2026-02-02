@@ -8,14 +8,14 @@ import {
   getAccount,
 } from "@solana/spl-token";
 import { expect } from "chai";
-import { MyFirstProject } from "../target/types/my_first_project";
+import { Anchortokenstarter } from "../target/types/anchortokenstarter";
 
-describe("my-first-project", () => {
+describe("AnchorTokenStarter", () => {
   // Configure the client to use the local cluster
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.MyFirstProject as Program<MyFirstProject>;
+  const program = anchor.workspace.Anchortokenstarter as Program<Anchortokenstarter>;
   const payer = provider.wallet as anchor.Wallet;
 
   // Derive mint PDA

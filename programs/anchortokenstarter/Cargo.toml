@@ -1,12 +1,12 @@
 [package]
-name = "my-first-project"
+name = "anchortokenstarter"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Anchor Token Starter - Solana token operations made easy"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "my_first_project"
+name = "anchortokenstarter"
 
 [features]
 default = []

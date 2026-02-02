@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Solana/Anchor project - a starter template for Solana program development. The project is currently a minimal "Hello World" program with a single `initialize` instruction.
+**AnchorTokenStarter** - A Solana/Anchor project demonstrating token operations including mint creation, token minting, and transfers. This starter template provides essential building blocks for Solana token development.
 
 **Program ID**: `4axna8Sy83cq21JRGeJnEunDDPZNGiiF1NGuoT6WZrBJ`
 
