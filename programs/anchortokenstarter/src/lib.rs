@@ -27,7 +27,7 @@ pub mod anchortokenstarter {
     }
 
     /// Create a new token mint
-    pub fn create_mint(ctx: Context<CreateMint>, decimals: u8) -> Result<()> {
+    pub fn create_mint(_ctx: Context<CreateMint>, decimals: u8) -> Result<()> {
         msg!("Creating token mint with {} decimals", decimals);
         Ok(())
     }

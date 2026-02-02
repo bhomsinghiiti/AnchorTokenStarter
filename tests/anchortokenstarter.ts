@@ -1,6 +1,11 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import { PublicKey, Keypair, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
+import {
+  PublicKey,
+  Keypair,
+  SystemProgram,
+  LAMPORTS_PER_SOL,
+} from "@solana/web3.js";
 import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -15,7 +20,8 @@ describe("AnchorTokenStarter", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.Anchortokenstarter as Program<Anchortokenstarter>;
+  const program = anchor.workspace
+    .Anchortokenstarter as Program<Anchortokenstarter>;
   const payer = provider.wallet as anchor.Wallet;
 
   // Derive mint PDA

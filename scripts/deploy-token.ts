@@ -10,15 +10,22 @@
  *   ANCHOR_WALLET        - Wallet keypair file
  */
 
-import { createMint, createAssociatedTokenAccount, mintTo } from "@solana/spl-token";
+import {
+  createMint,
+  createAssociatedTokenAccount,
+  mintTo,
+} from "@solana/spl-token";
 import { getOrCreateKeypair, loadKeypair } from "./utils";
 
-const DEPLOYER_KEYPAIR_PATH = process.env.ANCHOR_WALLET || "~/.config/solana/id.json";
+const DEPLOYER_KEYPAIR_PATH =
+  process.env.ANCHOR_WALLET || "~/.config/solana/id.json";
 
 async function main() {
   // Load deployer keypair (like private key in Foundry)
   const deployer = loadKeypair(DEPLOYER_KEYPAIR_PATH);
-  const connection = new Connection(process.env.ANCHOR_PROVIDER_URL || "http://localhost:8899");
+  const connection = new Connection(
+    process.env.ANCHOR_PROVIDER_URL || "http://localhost:8899"
+  );
 
   console.log("🚀 Deploying new SPL Token...");
   console.log("Deployer:", deployer.publicKey.toBase58());
@@ -31,8 +38,8 @@ async function main() {
     symbol: "MTK",
     decimals: 9,
     initialSupply: 1_000_000, // 1 million tokens
-    mintable: true,           // Can mint more later?
-    freezable: false,         // Can freeze accounts?
+    mintable: true, // Can mint more later?
+    freezable: false, // Can freeze accounts?
   };
 
   // Create the mint (like deploying ERC20 contract)
@@ -45,8 +52,8 @@ async function main() {
 
   const mint = await createMint(
     connection,
-    deployer,        // Payer (like gas)
-    mintAuthority,   // Who can mint
+    deployer, // Payer (like gas)
+    mintAuthority, // Who can mint
     freezeAuthority, // Who can freeze
     TOKEN_CONFIG.decimals
   );
@@ -61,7 +68,7 @@ async function main() {
     deployer.publicKey
   );
 
-  const amount = TOKEN_CONFIG.initialSupply * 10**TOKEN_CONFIG.decimals;
+  const amount = TOKEN_CONFIG.initialSupply * 10 ** TOKEN_CONFIG.decimals;
   await mintTo(
     connection,
     deployer,
@@ -81,13 +88,19 @@ async function main() {
   console.log("Deployer Address:", deployer.publicKey.toBase58());
   console.log("Deployer Token Account:", deployerTokenAccount.toBase58());
   console.log("\n📋 Save this info:");
-  console.log(JSON.stringify({
-    mintAddress: mint.toBase58(),
-    deployer: deployer.publicKey.toBase58(),
-    tokenAccount: deployerTokenAccount.toBase58(),
-    decimals: TOKEN_CONFIG.decimals,
-    initialSupply: TOKEN_CONFIG.initialSupply,
-  }, null, 2));
+  console.log(
+    JSON.stringify(
+      {
+        mintAddress: mint.toBase58(),
+        deployer: deployer.publicKey.toBase58(),
+        tokenAccount: deployerTokenAccount.toBase58(),
+        decimals: TOKEN_CONFIG.decimals,
+        initialSupply: TOKEN_CONFIG.initialSupply,
+      },
+      null,
+      2
+    )
+  );
 }
 
 main().catch(console.error);
