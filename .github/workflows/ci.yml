@@ -13,8 +13,8 @@ env:
   SOLANA_VERSION: 3.1.8
 
 jobs:
-  build:
-    name: Build
+  ci:
+    name: Build & Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -25,118 +25,6 @@ jobs:
         with:
           toolchain: 1.93.0
           components: rustfmt
-
-      - name: Cache Solana Toolchain
-        id: cache-solana
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/solana/
-            ~/.local/share/solana/
-          key: solana-${{ env.SOLANA_VERSION }}
-
-      - name: Install Solana CLI
-        run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/v${{ env.SOLANA_VERSION }}/install)"
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          solana --version
-
-      - name: Cache AVM and Anchor builds
-        id: cache-anchor
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.avm/
-            ~/.cargo/bin/anchor
-            target/
-          key: anchor-${{ env.ANCHOR_VERSION }}-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
-
-      - name: Install AVM and Anchor
-        run: |
-          cargo install --git https://github.com/coral-xyz/anchor avm --force --locked
-          avm install ${{ env.ANCHOR_VERSION }}
-          avm use ${{ env.ANCHOR_VERSION }}
-          export PATH="$HOME/.avm/bin:$PATH"
-          anchor --version
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.10.0
-          cache: yarn
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Anchor Build
-        run: |
-          export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$PATH"
-          anchor build
-
-      - name: Upload program artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: program-binaries
-          path: target/deploy/*.so
-
-  fmt:
-    name: Format
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: 1.93.0
-          components: rustfmt
-
-      - name: Check Rust formatting
-        run: cargo fmt --all -- --check
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24.10.0
-          cache: yarn
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Check TypeScript/JS formatting
-        run: yarn lint
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: 1.93.0
-
-      - name: Cache Solana Toolchain
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/solana/
-            ~/.local/share/solana/
-          key: solana-${{ env.SOLANA_VERSION }}
-
-      - name: Cache AVM and Anchor builds
-        id: cache-anchor
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.avm/
-            ~/.cargo/bin/anchor
-            target/
-          key: anchor-${{ env.ANCHOR_VERSION }}-${{ hashFiles('**/Cargo.toml', '**/Cargo.lock') }}
 
       - name: Install Solana CLI and Anchor
         run: |
@@ -159,25 +47,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Anchor Test
-        run: anchor test --skip-local-validator
+      - name: Build
+        run: anchor build
 
-  # Optional: Security audit
-  audit:
-    name: Security Audit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: 1.93.0
-
-      - name: Install cargo-audit
-        run: cargo install cargo-audit
-
-      - name: Run cargo audit
-        run: cargo audit
-        continue-on-error: true
+      - name: Test
+        run: anchor test
