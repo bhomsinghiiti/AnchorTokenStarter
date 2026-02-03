@@ -7,6 +7,7 @@ skip-lint = false
 
 [programs.localnet]
 anchortokenstarter = "AT3LVeEomGSHCdD1vASqsnFvwm8Y4KmY9Z9BLbEt3jEa"
+access_registry = "25fGver7srxMVBXA8H7eMXMUqXAkxiHLF1w7V91t9Zfw"
 
 [registry]
 url = "https://api.apr.dev"
