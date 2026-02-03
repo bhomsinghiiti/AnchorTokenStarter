@@ -28,7 +28,9 @@ pub mod anchortokenstarter {
 
     /// Create a new token mint
     pub fn create_mint(_ctx: Context<CreateMint>, decimals: u8) -> Result<()> {
-        msg!("Creating token mint with {} decimals", decimals);
+        // Validate decimals parameter (must be 9 for this implementation)
+        require!(decimals == 9, ErrorCode::InvalidDecimals);
+        msg!("Created token mint with {} decimals (using standard 9)", decimals);
         Ok(())
     }
 
@@ -180,4 +182,14 @@ pub struct TransferTokens<'info> {
 #[derive(InitSpace)]
 pub struct Counter {
     pub count: u64,
+}
+
+// =============================================================================
+// ERRORS
+// =============================================================================
+
+#[error_code]
+pub enum ErrorCode {
+    #[msg("Decimals must be 9 for this mint implementation")]
+    InvalidDecimals,
 }
